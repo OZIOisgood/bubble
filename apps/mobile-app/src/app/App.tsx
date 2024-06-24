@@ -16,87 +16,86 @@ import { Audio } from 'expo-av';
 
 const TRACK_VOLUME = 0.1;
 
-type UseSoundReturnType = {
-  play: () => Promise<void>;
-  volume: (value: number) => Promise<void>;
-  pause: () => Promise<void>;
-  stop: () => Promise<void>;
+type SoundInstance = {
+  sound: Audio.Sound;
   isPlaying: boolean;
-  isLoading: boolean;
-  error: Error | null;
+  volume: number;
 };
 
-const useSound = (url: string): UseSoundReturnType => {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+class SoundService {
+  private static instance: SoundService;
+  private sounds: { [id: string]: SoundInstance } = {};
+  private lastPausedId: string | null = null;
 
-  useEffect(() => {
-    const loadSound = async () => {
-      try {
-        setIsLoading(true);
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: url },
-          { shouldPlay: false }
-        );
-        setSound(sound);
-      } catch (e) {
-        setError(e as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  private constructor() {}
 
-    loadSound();
+  public static getInstance(): SoundService {
+    if (!SoundService.instance) {
+      SoundService.instance = new SoundService();
+    }
+    return SoundService.instance;
+  }
 
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [url]);
-
-  const play = useCallback(async () => {
-    if (sound) {
+  public async playSound(
+    id: string,
+    url: string,
+    volume: number
+  ): Promise<void> {
+    if (this.sounds[id]) {
+      await this.sounds[id].sound.setVolumeAsync(volume);
+      await this.sounds[id].sound.playAsync();
+      this.sounds[id].isPlaying = true;
+      this.sounds[id].volume = volume;
+    } else {
+      const { sound } = await Audio.Sound.createAsync({ uri: url });
+      await sound.setVolumeAsync(volume);
+      this.sounds[id] = { sound, isPlaying: true, volume };
       await sound.playAsync();
-      setIsPlaying(true);
     }
-  }, [sound]);
+  }
 
-  const volume = useCallback(
-    async (value: number) => {
-      if (sound) {
-        await sound.setVolumeAsync(value);
+  public async pauseSound(id: string): Promise<void> {
+    if (this.sounds[id] && this.sounds[id].isPlaying) {
+      await this.sounds[id].sound.pauseAsync();
+      this.sounds[id].isPlaying = false;
+      this.lastPausedId = id;
+    }
+  }
+
+  public async pauseAllSounds(): Promise<void> {
+    const pausePromises = Object.values(this.sounds).map(
+      async (soundInstance) => {
+        if (soundInstance.isPlaying) {
+          await soundInstance.sound.pauseAsync();
+          soundInstance.isPlaying = false;
+          this.lastPausedId =
+            Object.keys(this.sounds).find(
+              (key) => this.sounds[key] === soundInstance
+            ) || null;
+        }
       }
-    },
-    [sound]
-  );
+    );
+    await Promise.all(pausePromises);
+  }
 
-  const pause = useCallback(async () => {
-    if (sound) {
-      await sound.pauseAsync();
-      setIsPlaying(false);
+  public async stopAllSounds(): Promise<void> {
+    const stopPromises = Object.values(this.sounds).map(
+      async (soundInstance) => {
+        await soundInstance.sound.stopAsync();
+        soundInstance.isPlaying = false;
+      }
+    );
+    await Promise.all(stopPromises);
+    this.lastPausedId = null;
+  }
+
+  public async unpauseLastSound(): Promise<void> {
+    if (this.lastPausedId && this.sounds[this.lastPausedId]) {
+      await this.sounds[this.lastPausedId].sound.playAsync();
+      this.sounds[this.lastPausedId].isPlaying = true;
     }
-  }, [sound]);
-
-  const stop = useCallback(async () => {
-    if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-    }
-  }, [sound]);
-
-  return {
-    play,
-    volume,
-    pause,
-    stop,
-    isPlaying,
-    isLoading,
-    error,
-  };
-};
+  }
+}
 
 const ProfileRoute = () => (
   <SafeAreaView>
@@ -122,20 +121,22 @@ const TrackCard = ({
   onLikePress: () => void;
 }) => {
   const { colors } = useTheme();
-  const { play, volume, pause, stop, isPlaying, isLoading, error } = useSound(
-    track.preview_url as string
-  );
 
-  // Automatically play the sound when the component mounts
+  const soundService = SoundService.getInstance();
+
   useEffect(() => {
-    if (isPlay && !isLoading && !isPlaying && !error) {
-      play();
-      volume(TRACK_VOLUME);
+    if (isPlay) {
+      soundService.playSound(
+        track.id,
+        track.preview_url as string,
+        TRACK_VOLUME
+      );
     }
-    if (!isPlay && (isPlaying || isLoading || error)) {
-      stop();
+
+    if (!isPlay) {
+      soundService.pauseSound(track.id);
     }
-  }, [isPlay, isLoading, isPlaying, error, play]);
+  }, [isPlay, track.id, track.preview_url, soundService]);
 
   return (
     <Card
@@ -154,22 +155,6 @@ const TrackCard = ({
             source={{ uri: track.album.images[0].url }}
           />
         </View>
-
-        {/* <View style={trackCardStyle.buttonContainer}>
-          <Button
-            icon="play"
-            mode="contained"
-            textColor={colors.primary}
-            style={{
-              flex: 1,
-              margin: 5,
-              backgroundColor: colors.secondaryContainer,
-            }}
-            onPress={play}
-          >
-            Play
-          </Button>
-        </View> */}
 
         <View style={trackCardStyle.buttonContainer}>
           <Button
@@ -234,7 +219,11 @@ const trackCardStyle = StyleSheet.create({
   },
 });
 
-const RecommendationsRoute = () => {
+const RecommendationsRoute = ({
+  isActiveRoute,
+}: {
+  isActiveRoute: boolean;
+}) => {
   const swiperRef = useRef<Swiper<TrackDto>>(null);
   const { colors } = useTheme();
   const [index, setIndex] = React.useState(0);
@@ -246,6 +235,20 @@ const RecommendationsRoute = () => {
   const onCardSwiped = () => {
     setIndex(index + 1);
   };
+
+  const soundService = SoundService.getInstance();
+
+  useEffect(() => {
+    // Unpause last sound when entering the route
+    if (isActiveRoute) {
+      soundService.unpauseLastSound();
+    }
+
+    // Pause all sounds when leaving the route
+    if (!isActiveRoute) {
+      soundService.pauseAllSounds();
+    }
+  }, [isActiveRoute]);
 
   const overlayLabels = {
     left: {
@@ -299,7 +302,7 @@ const RecommendationsRoute = () => {
         onSwiped={onCardSwiped}
         renderCard={(cardData: TrackDto, cardIndex: number) => (
           <TrackCard
-            isPlay={cardIndex === index}
+            isPlay={cardIndex === index && isActiveRoute}
             track={cardData}
             onDislikePress={() => {
               swiperRef.current?.swipeLeft();
@@ -316,7 +319,8 @@ const RecommendationsRoute = () => {
 
 const App = () => {
   const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
+
+  const bottomNavigationRoutes = [
     {
       key: 'profile',
       title: 'Profile',
@@ -335,13 +339,28 @@ const App = () => {
       focusedIcon: 'playlist-music',
       unfocusedIcon: 'playlist-music-outline',
     },
-  ]);
+  ];
 
-  const renderScene = BottomNavigation.SceneMap({
-    profile: ProfileRoute,
-    recommendations: RecommendationsRoute,
-    playlists: PlaylistsRoute,
-  });
+  const [routes] = React.useState(bottomNavigationRoutes);
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    switch (route.key) {
+      case 'profile':
+        return <ProfileRoute />;
+      case 'recommendations':
+        return (
+          <RecommendationsRoute
+            isActiveRoute={
+              index === routes.findIndex((r) => r.key === 'recommendations')
+            }
+          />
+        );
+      case 'playlists':
+        return <PlaylistsRoute />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <SafeAreaProvider>
