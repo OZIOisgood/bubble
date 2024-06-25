@@ -1,4 +1,7 @@
+import { MD3DarkTheme as DefaultTheme } from 'react-native-paper';
+
 export default {
+  ...DefaultTheme,
   colors: {
     primary: 'rgb(79, 216, 235)',
     onPrimary: 'rgb(0, 54, 61)',

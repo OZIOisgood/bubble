@@ -207,7 +207,7 @@ const TrackCard = ({
             isPaused && (
               <IconButton
                 icon="pause"
-                size={75}
+                size={100}
                 style={{
                   position: 'absolute',
                 }}
@@ -263,9 +263,9 @@ const trackCardStyle = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
   },
   buttonContainer: {
     flexDirection: 'row',
