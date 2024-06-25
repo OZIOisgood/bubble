@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import {
   BottomNavigation,
   Button,
   Card,
+  IconButton,
   PaperProvider,
   Text,
   useTheme,
@@ -110,33 +111,71 @@ const PlaylistsRoute = () => (
 );
 
 const TrackCard = ({
-  isPlay,
+  isFirstCard,
+  shouldPlay,
   track,
   onLikePress,
   onDislikePress,
 }: {
-  isPlay: boolean;
+  isFirstCard: boolean;
+  shouldPlay: boolean;
   track: TrackDto;
   onDislikePress: () => void;
   onLikePress: () => void;
 }) => {
   const { colors } = useTheme();
+  const [isFirstPlay, setIsFirstPlay] = useState(true);
+  const [isPaused, setIsPaused] = useState(isFirstCard);
 
   const soundService = SoundService.getInstance();
 
   useEffect(() => {
-    if (isPlay) {
+    if (!isFirstCard && shouldPlay) {
+      setIsFirstPlay(false);
+
+      soundService.pauseAllSounds();
       soundService.playSound(
         track.id,
         track.preview_url as string,
         TRACK_VOLUME
       );
     }
+  }, [isFirstCard, shouldPlay]);
 
-    if (!isPlay) {
-      soundService.pauseSound(track.id);
+  const onPausePress = () => {
+    setIsPaused(!isPaused);
+
+    const shouldPause = !isPaused;
+
+    if (isFirstCard) {
+      if (shouldPause) {
+        // pause song
+        soundService.pauseSound(track.id);
+      } else {
+        if (isFirstPlay) {
+          setIsFirstPlay(false);
+
+          // play song
+          soundService.playSound(
+            track.id,
+            track.preview_url as string,
+            TRACK_VOLUME
+          );
+        } else {
+          // unpause song
+          soundService.unpauseLastSound();
+        }
+      }
+    } else {
+      if (shouldPause) {
+        // pause song
+        soundService.pauseSound(track.id);
+      } else {
+        // unpause song
+        soundService.unpauseLastSound();
+      }
     }
-  }, [isPlay, track.id, track.preview_url, soundService]);
+  };
 
   return (
     <Card
@@ -148,12 +187,33 @@ const TrackCard = ({
         flex: 1,
       }}
     >
-      <View key="trackCardStyle-container" style={trackCardStyle.container}>
+      <TouchableOpacity
+        key="trackCardStyle-container"
+        style={trackCardStyle.container}
+        onPress={onPausePress}
+      >
         <View style={trackCardStyle.imageContainer}>
           <Image
-            style={trackCardStyle.image}
+            style={{
+              ...trackCardStyle.image,
+              opacity: isPaused ? 0.5 : 1,
+            }}
             source={{ uri: track.album.images[0].url }}
+            blurRadius={isPaused ? 5 : 0}
           />
+
+          {
+            // Show play icon when paused
+            isPaused && (
+              <IconButton
+                icon="pause"
+                size={75}
+                style={{
+                  position: 'absolute',
+                }}
+              />
+            )
+          }
         </View>
 
         <View style={trackCardStyle.buttonContainer}>
@@ -185,7 +245,7 @@ const TrackCard = ({
             Like
           </Button>
         </View>
-      </View>
+      </TouchableOpacity>
     </Card>
   );
 };
@@ -302,7 +362,8 @@ const RecommendationsRoute = ({
         onSwiped={onCardSwiped}
         renderCard={(cardData: TrackDto, cardIndex: number) => (
           <TrackCard
-            isPlay={cardIndex === index && isActiveRoute}
+            isFirstCard={cardIndex === 0}
+            shouldPlay={cardIndex === index}
             track={cardData}
             onDislikePress={() => {
               swiperRef.current?.swipeLeft();
@@ -318,7 +379,7 @@ const RecommendationsRoute = ({
 };
 
 const App = () => {
-  const [index, setIndex] = React.useState(0);
+  const [index, setIndex] = React.useState(1);
 
   const bottomNavigationRoutes = [
     {
