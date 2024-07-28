@@ -14,6 +14,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import recommendationsDtoMock, { TrackDto } from './recommendationsDtoMock';
 import theme from './theme';
 import { Audio } from 'expo-av';
+import { BaseRoute } from 'react-native-paper/lib/typescript/components/BottomNavigation/BottomNavigation';
 
 const TRACK_VOLUME = 0.1;
 
@@ -378,50 +379,29 @@ const RecommendationsRoute = ({
   );
 };
 
+const routes: BaseRoute[] = [
+  {
+    key: 'profile',
+    title: 'Profile',
+    focusedIcon: 'account',
+    unfocusedIcon: 'account-outline',
+  },
+  {
+    key: 'recommendations',
+    title: 'Recommendations',
+    focusedIcon: 'star',
+    unfocusedIcon: 'star-outline',
+  },
+  {
+    key: 'playlists',
+    title: 'Playlists',
+    focusedIcon: 'playlist-music',
+    unfocusedIcon: 'playlist-music-outline',
+  },
+];
+
 const App = () => {
   const [index, setIndex] = React.useState(1);
-
-  const bottomNavigationRoutes = [
-    {
-      key: 'profile',
-      title: 'Profile',
-      focusedIcon: 'account',
-      unfocusedIcon: 'account-outline',
-    },
-    {
-      key: 'recommendations',
-      title: 'Recommendations',
-      focusedIcon: 'star',
-      unfocusedIcon: 'star-outline',
-    },
-    {
-      key: 'playlists',
-      title: 'Playlists',
-      focusedIcon: 'playlist-music',
-      unfocusedIcon: 'playlist-music-outline',
-    },
-  ];
-
-  const [routes] = React.useState(bottomNavigationRoutes);
-
-  const renderScene = ({ route }: { route: { key: string } }) => {
-    switch (route.key) {
-      case 'profile':
-        return <ProfileRoute />;
-      case 'recommendations':
-        return (
-          <RecommendationsRoute
-            isActiveRoute={
-              index === routes.findIndex((r) => r.key === 'recommendations')
-            }
-          />
-        );
-      case 'playlists':
-        return <PlaylistsRoute />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <SafeAreaProvider>
@@ -429,7 +409,25 @@ const App = () => {
         <BottomNavigation
           navigationState={{ index, routes }}
           onIndexChange={setIndex}
-          renderScene={renderScene}
+          renderScene={({ route }) => {
+            switch (route.key) {
+              case 'profile':
+                return <ProfileRoute />;
+              case 'recommendations':
+                return (
+                  <RecommendationsRoute
+                    isActiveRoute={
+                      index ===
+                      routes.findIndex((r) => r.key === 'recommendations')
+                    }
+                  />
+                );
+              case 'playlists':
+                return <PlaylistsRoute />;
+              default:
+                return null;
+            }
+          }}
         />
       </PaperProvider>
     </SafeAreaProvider>
