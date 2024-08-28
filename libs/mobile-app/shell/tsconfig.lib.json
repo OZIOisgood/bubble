@@ -5,5 +5,11 @@
     "types": ["node"]
   },
   "exclude": ["**/*.spec.ts", "**/*.spec.tsx", "src/test-setup.ts"],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "../features/recommendations/src/screens/recommendations/recommendationsDtoMock.ts"
+  ]
 }
