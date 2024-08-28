@@ -18,6 +18,9 @@
       "@buble/mobile-app/features/playlists": [
         "libs/mobile-app/features/playlists/src/index.ts"
       ],
+      "@buble/mobile-app/features/profile": [
+        "libs/mobile-app/features/profile/src/index.ts"
+      ],
       "@buble/mobile-app/features/recommendations": [
         "libs/mobile-app/features/recommendations/src/index.ts"
       ],
