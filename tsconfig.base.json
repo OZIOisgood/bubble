@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@buble/mobile-app/features/recommendations": [
+        "libs/mobile-app/features/recommendations/src/index.ts"
+      ],
       "@buble/shell": ["libs/mobile-app/shell/src/index.ts"]
     }
   },
