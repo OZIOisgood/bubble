@@ -4,16 +4,11 @@ import { BottomNavigation, PaperProvider, Text } from 'react-native-paper';
 import { BaseRoute } from 'react-native-paper/lib/typescript/components/BottomNavigation/BottomNavigation';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import theme from './theme';
+import { PlaylistsScreen } from '@buble/mobile-app/features/playlists';
 
 const ProfileScreen = () => (
   <SafeAreaView>
     <Text>Profile</Text>
-  </SafeAreaView>
-);
-
-const PlaylistsScreen = () => (
-  <SafeAreaView>
-    <Text>PlaylistsScreen</Text>
   </SafeAreaView>
 );
 

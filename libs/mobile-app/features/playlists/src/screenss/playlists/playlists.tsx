@@ -1,20 +1,8 @@
+import { Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import React from 'react';
-
-import { View, Text } from 'react-native';
-
-/* eslint-disable-next-line */
-export interface PlaylistsProps {
-}
-
-
-export function Playlists(props: PlaylistsProps) {
-  return (
-    <View>
-      <Text>Welcome to playlists!</Text>
-    </View>
-  );
-}
-
-
-export default Playlists;
+export const PlaylistsScreen = () => (
+  <SafeAreaView>
+    <Text>PlaylistsScreen</Text>
+  </SafeAreaView>
+);
