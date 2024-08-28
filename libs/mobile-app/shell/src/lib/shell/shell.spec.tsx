@@ -1,11 +1,9 @@
-import React from 'react';
+import * as React from 'react';
 import { render } from '@testing-library/react-native';
 
-import Shell from './shell';
+import Shell from './Shell';
 
-describe('Shell', () => {
-  it('should render successfully', () => {
-    const { root } = render(< Shell />);
-    expect(root).toBeTruthy();
-  });
+test('renders correctly', () => {
+  const { getByTestId } = render(<Shell />);
+  expect(getByTestId('heading')).toHaveTextContent('Welcome');
 });

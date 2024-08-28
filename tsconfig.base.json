@@ -18,7 +18,7 @@
       "@buble/mobile-app/features/recommendations": [
         "libs/mobile-app/features/recommendations/src/index.ts"
       ],
-      "@buble/shell": ["libs/mobile-app/shell/src/index.ts"]
+      "@buble/mobile-app/shell": ["libs/mobile-app/shell/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
