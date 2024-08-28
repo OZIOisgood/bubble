@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@buble/mobile-app/features/playlists": [
+        "libs/mobile-app/features/playlists/src/index.ts"
+      ],
       "@buble/mobile-app/features/recommendations": [
         "libs/mobile-app/features/recommendations/src/index.ts"
       ],
