@@ -1,31 +1,25 @@
-import { RecommendationsScreen } from '@buble/mobile-app/features/recommendations';
+import {
+  PlaylistsRoute,
+  PlaylistsScreen,
+} from '@buble/mobile-app/features/playlists';
+import {
+  ProfileRoute,
+  ProfileScreen,
+} from '@buble/mobile-app/features/profile';
+import {
+  RecommendationsRoute,
+  RecommendationsScreen,
+} from '@buble/mobile-app/features/recommendations';
 import React from 'react';
-import { BottomNavigation, PaperProvider, Text } from 'react-native-paper';
+import { BottomNavigation, PaperProvider } from 'react-native-paper';
 import { BaseRoute } from 'react-native-paper/lib/typescript/components/BottomNavigation/BottomNavigation';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import theme from './theme';
-import { PlaylistsScreen } from '@buble/mobile-app/features/playlists';
-import { ProfileScreen } from '@buble/mobile-app/features/profile';
 
 const routes: BaseRoute[] = [
-  {
-    key: 'profile',
-    title: 'Profile',
-    focusedIcon: 'account',
-    unfocusedIcon: 'account-outline',
-  },
-  {
-    key: 'recommendations',
-    title: 'Recommendations',
-    focusedIcon: 'star',
-    unfocusedIcon: 'star-outline',
-  },
-  {
-    key: 'playlists',
-    title: 'Playlists',
-    focusedIcon: 'playlist-music',
-    unfocusedIcon: 'playlist-music-outline',
-  },
+  ProfileRoute,
+  RecommendationsRoute,
+  PlaylistsRoute,
 ];
 
 export const Shell = () => {
