@@ -1,20 +1,8 @@
+import { Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import React from 'react';
-
-import { View, Text } from 'react-native';
-
-/* eslint-disable-next-line */
-export interface ProfileProps {
-}
-
-
-export function Profile(props: ProfileProps) {
-  return (
-    <View>
-      <Text>Welcome to profile!</Text>
-    </View>
-  );
-}
-
-
-export default Profile;
+export const ProfileScreen = () => (
+  <SafeAreaView>
+    <Text>ProfileScreen</Text>
+  </SafeAreaView>
+);

@@ -5,12 +5,7 @@ import { BaseRoute } from 'react-native-paper/lib/typescript/components/BottomNa
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import theme from './theme';
 import { PlaylistsScreen } from '@buble/mobile-app/features/playlists';
-
-const ProfileScreen = () => (
-  <SafeAreaView>
-    <Text>Profile</Text>
-  </SafeAreaView>
-);
+import { ProfileScreen } from '@buble/mobile-app/features/profile';
 
 const routes: BaseRoute[] = [
   {
