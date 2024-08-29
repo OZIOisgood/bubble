@@ -1,2 +1,2 @@
 export * from './routes/playlists.route';
-export * from './screenss/playlists/playlists';
+export * from './screens/playlists/playlists';
