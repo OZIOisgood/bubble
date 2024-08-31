@@ -39,7 +39,8 @@
       "plugin": "@nx/jest/plugin",
       "options": {
         "targetName": "test"
-      }
+      },
+      "exclude": ["apps/api-e2e/**/*"]
     },
     {
       "plugin": "@nx/detox/plugin",
@@ -47,6 +48,14 @@
         "buildTargetName": "build",
         "startTargetName": "start",
         "testTargetName": "test"
+      }
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview"
       }
     }
   ],
